@@ -1,0 +1,54 @@
+End-to-End COVID Data Analytics Pipeline (Kaggle → Python → SQL Server)
+
+This project demonstrates a full analytics workflow using publicly available global COVID-19 data. The objective was to simulate a real-world data pipeline by ingesting raw data, cleaning and engineering metrics in Python, and structuring the data inside SQL Server for analysis and reporting.
+
+Project Summary:
+-Ingested raw COVID-19 dataset from Kaggle into Jupyter Notebook
+
+-Performed data cleaning and validation using pandas (handled scientific notation, validated numeric types, standardized fields)
+-Engineered derived metrics including:
+  -Case Fatality Rate
+  -Active Case Rate
+  -Cases per 100k population (normalized metrics)
+
+-Loaded the cleaned dataset into SQL Server using SQLAlchemy and pyodbc
+
+-Applied SQL transformations including:
+
+  -Phase 1 — Data Cleaning & Standardization
+    -Created a dedicated SQL Server database (CovidDB) and validated the dataset before transformations.
+    -Cleaned text fields by removing leading/trailing whitespace from country and continent.
+    -Removed non-country rollup rows by deleting records where continent = 'All'.
+    -Identified abbreviated country names using string-length filtering and standardized them into full names (USA → United States, UK → United Kingdom, UAE → United Arab Emirates, DRC → Democratic Republic of Congo, CAR → Central African Republic, DPRK → North Korea) using nested REPLACE() logic.
+
+  Phase 2 — Table Enhancements & Metric Engineering
+    -Built continent-level summaries by aggregating total_cases across continents.
+    -Added a case_rank column and populated it using a window function (RANK() OVER (ORDER BY total_cases DESC)) to rank countries by total cases.
+    -Added a Risk_category column and assigned risk tiers using 
+      -CASE logic:
+        High: > 1,000,000 cases
+        Medium: > 100,000 cases
+        Low: otherwise
+
+    -Calculated and permanently stored two key rate metrics:
+      -case_fatality_rate = (total_deaths / total_cases)
+      -active_case_rate = (active_cases / total_cases)
+        -Then converted both to whole-numbers by multiplying by 100 and rounding.
+
+-Structured the workflow to simulate a production-style analytics pipeline
+
+Technologies Used:
+  -Python (pandas, SQLAlchemy)
+
+  -SQL Server (SSMS 22)
+
+  -SQL (aggregation, CASE logic, schema modification)
+
+  -Kaggle (data source)
+
+Key Outcomes:
+  -Built a structured dataset optimized for analytical querying
+  -Demonstrated end-to-end ownership of data ingestion, transformation, and storage
+  -Practiced database-level transformations and schema-level decision making
+
+Produced a cleaned and enriched SQL table (Covid_nums) that supports structured analysis, including standardized country     naming, continent-level rollups, ranked case comparisons, risk segmentation, and percent-based rate metrics for reporting and insights.
